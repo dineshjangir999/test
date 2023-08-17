@@ -20,7 +20,6 @@ collection = db[registered_users]
 def recognize_face_data(uploaded_image):
     uploaded_face = face_recognition.load_image_file(uploaded_image)
     uploaded_face_encodings = face_recognition.face_encodings(uploaded_face)
-    breakpoint()
     for uploaded_face_encoding in uploaded_face_encodings:
         for user in collection.find():
             registered_face_encoding = np.fromstring(
@@ -30,7 +29,7 @@ def recognize_face_data(uploaded_image):
                 [registered_face_encoding], uploaded_face_encoding)
             if any(match_results):
                 recognized_user = user['name']
-                return jsonify({'recognized_user': recognized_user})
+                return jsonify({'message': recognized_user})
 
     return False
 
@@ -43,7 +42,9 @@ def register_face():
     new_face_encoding = face_recognition.face_encodings(new_face)
     if not new_face_encoding:
         return jsonify({'message': 'Face Not Found'})
-    else:
+    elif len(new_face_encoding)> 1:
+        return jsonify({'message': 'Multiple Users Found'})
+    else: 
         new_face_encoding = new_face_encoding[0]
 
     if not recognize_face_data(face_image):
